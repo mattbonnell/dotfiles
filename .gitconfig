@@ -1,1 +1,24 @@
-/Users/mattbonnell/.gitconfig
+# This is Git's per-user configuration file.
+[user]
+# Please adapt and uncomment the following lines:
+
+
+	name = Matt Bonnell
+
+	email = matt.bonnell@icloud.com
+
+	[alias]
+  		co = checkout
+  		c = commit
+ 		st = status
+		ps = push
+		pl = pull
+  		b = branch
+		a = add
+  		hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+  		type = cat-file -t
+  		dump = cat-file -p
+[core]
+	autocrlf = input
+[push]
+	default = simple
