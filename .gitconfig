@@ -10,11 +10,12 @@
 	[alias]
   		co = checkout
   		c = commit
- 		st = status
+ 		s = status
 		ps = push
 		pl = pull
   		b = branch
 		a = add
+		d = diff
   		hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
   		type = cat-file -t
   		dump = cat-file -p
@@ -22,3 +23,12 @@
 	autocrlf = input
 [push]
 	default = simple
+[init]
+	defaultBranch = master
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[pull]
+	rebase = false

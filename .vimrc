@@ -42,6 +42,7 @@ Plug 'leafgarland/typescript-vim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'sebdah/vim-delve'
+Plug 'dart-lang/dart-vim-plugin'
 call plug#end()
 
 " -------------------------------------------------------------------------------------------------
@@ -80,12 +81,13 @@ filetype plugin on
 filetype indent on
 
 autocmd FileType html setlocal shiftwidth=2 tabstop=2 expandtab
-autocmd FileType javascript setlocal shiftwidth=2 tabstop=2 expandtab
-autocmd FileType typescript setlocal shiftwidth=2 tabstop=2 expandtab
+autocmd FileType javascript setlocal shiftwidth=4 tabstop=4 expandtab
+autocmd FileType typescript setlocal shiftwidth=4 tabstop=4 expandtab
 autocmd FileType yaml setlocal shiftwidth=2 tabstop=2 expandtab
 autocmd FileType typescriptreact setlocal shiftwidth=2 tabstop=2 expandtab
 autocmd FileType c setlocal shiftwidth=4 tabstop=4 expandtab
 autocmd FileType h setlocal shiftwidth=4 tabstop=4 expandtab
+autocmd FileType dart setlocal shiftwidth=2 tabstop=2 expandtab
 
 " Custom functions
 function MoveToPrevTab()
@@ -117,6 +119,20 @@ vnoremap c "_c
 " replace currently selected text with default register
 " without yanking it
 vnoremap p "_dP
+
+" navigate visual lines by default
+nnoremap k gk
+vnoremap k gk
+nnoremap j gj
+vnoremap j gj
+nnoremap $ g$
+vnoremap $ g$
+nnoremap 0 g0
+vnoremap 0 g0
+
+" coc-definition custom functions
+nnoremap <silent> gs :call CocAction('jumpDefinition', 'vsplit')<CR>
+
 
 " -------------------------------------------------------------------------------------------------
 " NERDTree
@@ -154,9 +170,16 @@ let g:go_fmt_autosave = 1
 let g:go_fmt_command = "goimports"
 let g:go_mod_fmt_autosave = 1
 let g:go_metalinter_enabled = ['all']
+let g:go_metalinter_autosave = 1
 let g:coc_snippet_next = '<tab>'
 let g:go_def_mode='gopls'
 let g:go_info_mode='gopls'
+
+" -------------------------------------------------------------------------------------------------
+" dart
+" -------------------------------------------------------------------------------------------------
+let g:lsc_auto_map = v:true
+let g:loaded_syntastic_dart_dartanalyzer_checker = 0
 
 " -------------------------------------------------------------------------------------------------
 " coc.nvim
@@ -227,3 +250,9 @@ nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 
 " Use :Prettier to format current buffer
 command! -nargs=0 Prettier :CocCommand prettier.formatFile
+
+" Floating window scrolling
+nnoremap <nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+nnoremap <nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+inoremap <nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+inoremap <nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
