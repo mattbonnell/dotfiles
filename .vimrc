@@ -25,7 +25,6 @@ endif
 endfunction
 
 call plug#begin('~/.vim/plugged')
-Plug 'fatih/vim-go', {'do': ':GoUpdateBinaries'}
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'arcticicestudio/nord-vim'
 Plug 'vim-airline/vim-airline'
@@ -42,8 +41,13 @@ Plug 'leafgarland/typescript-vim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'sebdah/vim-delve'
-Plug 'dart-lang/dart-vim-plugin'
+Plug 'google/vim-maktaba'
+Plug 'hashivim/vim-terraform'
+Plug 'cappyzawa/starlark.vim'
 call plug#end()
+
+syntax enable
+filetype plugin indent on
 
 " -------------------------------------------------------------------------------------------------
 " General
@@ -61,6 +65,11 @@ set number
 " usual behavior of <Esc> even in :term windows
 tnoremap <Esc> <C-\><C-n>
 
+" map ctrl+[ to escape
+map <C-[> <Esc>
+
+cnoreabbrev t term
+
 " inoremap <silent><expr> <TAB>
 "       \ pumvisible() ? coc#_select_confirm() :
 "       \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
@@ -72,8 +81,11 @@ let col = col('.') - 1
 return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-" make vim use system clipboard
-set clipboard=unnamedplus
+if has("unnamedplus")
+    set clipboard=unnamedplus
+else
+    set clipboard=unnamed
+endif
 
 " filetype-specific
 filetype on
@@ -84,10 +96,14 @@ autocmd FileType html setlocal shiftwidth=2 tabstop=2 expandtab
 autocmd FileType javascript setlocal shiftwidth=4 tabstop=4 expandtab
 autocmd FileType typescript setlocal shiftwidth=4 tabstop=4 expandtab
 autocmd FileType yaml setlocal shiftwidth=2 tabstop=2 expandtab
+autocmd FileType sh setlocal shiftwidth=2 tabstop=2 expandtab
+autocmd FileType bash setlocal shiftwidth=2 tabstop=2 expandtab
 autocmd FileType typescriptreact setlocal shiftwidth=2 tabstop=2 expandtab
 autocmd FileType c setlocal shiftwidth=4 tabstop=4 expandtab
 autocmd FileType h setlocal shiftwidth=4 tabstop=4 expandtab
 autocmd FileType dart setlocal shiftwidth=2 tabstop=2 expandtab
+autocmd FileType bazel setlocal shiftwidth=4 tabstop=4 expandtab
+autocmd FileType python let b:coc_root_patterns = ['.git', '.env', 'venv', '.venv', 'setup.cfg', 'setup.py', 'pyproject.toml', 'pyrightconfig.json']
 
 " Custom functions
 function MoveToPrevTab()
@@ -130,11 +146,32 @@ vnoremap $ g$
 nnoremap 0 g0
 vnoremap 0 g0
 
+" self-explanatory
+nnoremap ; :
+vnoremap ; :
+
+" NERDTree aliases
+command NF NERDTreeFind
+command NR NERDTreeRefreshRoot
+
 " coc-definition custom functions
 nnoremap <silent> gs :call CocAction('jumpDefinition', 'vsplit')<CR>
 
+" Use K to show documentation in preview window
+nnoremap <silent> K :call <SID>show_documentation()<CR>
 
-" -------------------------------------------------------------------------------------------------
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+" FZF
+nnoremap <silent> <C-p> :FZF<CR>
+
+" " -------------------------------------------------------------------------------------------------
 " NERDTree
 " -------------------------------------------------------------------------------------------------
 
@@ -196,21 +233,30 @@ set shortmess+=c
 " always show signcolumns
 set signcolumn=yes
 
-" Use tab for trigger completion with characters ahead and navigate.
-" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-inoremap <silent><expr> <TAB>
-    \ pumvisible() ? "\<C-n>" :
-    \ <SID>check_back_space() ? "\<TAB>" :
-    \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+" new stuff 
 
 function! s:check_back_space() abort
 let col = col('.') - 1
 return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-" Use <c-space> to trigger completion.
-inoremap <silent><expr> <c-space> coc#refresh()
+" Insert <tab> when previous text is space, refresh completion if not.
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1):
+      \ <SID>check_back_space() ? "\<Tab>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+
+" Use <CR> to confirm completion, use:
+
+inoremap <expr> <CR> coc#pum#visible() ? coc#_select_confirm() : "\<CR>"
+
+" To make <CR> to confirm selection of selected complete item or notify coc.nvim
+" to format on enter, use: >
+
+  inoremap <silent><expr> <CR> coc#pum#visible() ? coc#_select_confirm()
+				\: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
 
 " Use `[c` and `]c` to navigate diagnostics
 nmap <silent> [c <Plug>(coc-diagnostic-prev)
